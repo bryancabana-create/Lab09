@@ -8,17 +8,24 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -43,8 +50,9 @@ class MainActivity : ComponentActivity() {
 }
 
 fun crearServicio(): PostApiService {
+    val urlBase = "https://json-placeholder.mock.beeceptor.com/"
     val retrofit = Retrofit.Builder()
-        .baseUrl("https://jsonplaceholder.typicode.com/")
+        .baseUrl(urlBase)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -54,53 +62,63 @@ fun crearServicio(): PostApiService {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProgPrincipal9() {
-    val navController = rememberNavController()
     val servicio = crearServicio()
+    val navController = rememberNavController()
+
+    Scaffold(
+        topBar = { BarraSuperior() },
+        bottomBar = { BarraInferior(navController) },
+        content = { paddingValues -> Contenido(paddingValues, navController, servicio) },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BarraSuperior() {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = "JSONPlaceHolder Access",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = Color.White,
+        ),
+    )
+}
+
+@Composable
+fun BarraInferior(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text("JSONPlaceholder Access")
-                },
-            )
-        },
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = currentRoute == "inicio",
-                    onClick = {
-                        if (currentRoute != "inicio") {
-                            navController.navigate("inicio") {
-                                popUpTo("inicio") { inclusive = true }
-                            }
-                        }
-                    },
-                    icon = { Text("⌂") },
-                    label = { Text("Inicio") },
-                )
-
-                NavigationBarItem(
-                    selected = (currentRoute == "posts") || (currentRoute?.startsWith("postsVer") == true),
-                    onClick = {
-                        if (currentRoute != "posts") {
-                            navController.navigate("posts") {
-                                popUpTo("inicio")
-                            }
-                        }
-                    },
-                    icon = { Text("≡") },
-                    label = { Text("Posts") },
-                )
-            }
-        },
-    ) { paddingValues ->
-        Contenido(
-            pv = paddingValues,
-            navController = navController,
-            servicio = servicio,
+    NavigationBar {
+        NavigationBarItem(
+            icon = { Icon(Icons.Outlined.Home, contentDescription = "Inicio") },
+            label = { Text("Inicio") },
+            selected = currentRoute == "inicio",
+            onClick = {
+                if (currentRoute != "inicio") {
+                    navController.navigate("inicio") {
+                        popUpTo("inicio") { inclusive = true }
+                    }
+                }
+            },
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Outlined.Favorite, contentDescription = "Posts") },
+            label = { Text("Posts") },
+            selected = (currentRoute == "posts") || (currentRoute?.startsWith("postsVer") == true),
+            onClick = {
+                if (currentRoute != "posts") {
+                    navController.navigate("posts") {
+                        popUpTo("inicio")
+                    }
+                }
+            },
         )
     }
 }
@@ -120,28 +138,18 @@ fun Contenido(
             navController = navController,
             startDestination = "inicio",
         ) {
-            composable("inicio") {
-                ScreenInicio()
-            }
+            composable("inicio") { ScreenInicio() }
 
-            composable("posts") {
-                ScreenPosts(navController, servicio)
-            }
+            composable("posts") { ScreenPosts(navController, servicio) }
 
             composable(
                 "postsVer/{id}",
                 arguments = listOf(
-                    navArgument("id") {
-                        type = NavType.IntType
-                    },
+                    navArgument("id") { type = NavType.IntType },
                 ),
             ) { backStackEntry ->
                 val id = backStackEntry.arguments?.getInt("id") ?: 0
-                ScreenPost(
-                    navController = navController,
-                    servicio = servicio,
-                    id = id,
-                )
+                ScreenPost(navController, servicio, id)
             }
         }
     }
