@@ -39,14 +39,14 @@ import kotlinx.coroutines.launch
 fun ScreenPost(
     navController: NavHostController,
     servicio: PostApiService,
-    id: Int
+    id: Int,
 ) {
     var post by remember { mutableStateOf<PostModel?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoading by remember { mutableStateOf(value = true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    fun CargarPost() {
+    fun cargarPost() {
         scope.launch {
             isLoading = true
             errorMessage = null
@@ -61,7 +61,7 @@ fun ScreenPost(
     }
 
     LaunchedEffect(id) {
-        CargarPost()
+        cargarPost()
     }
 
     Box(
@@ -114,7 +114,7 @@ fun ScreenPost(
                         OutlinedButton(onClick = { navController.popBackStack() }) {
                             Text("Volver")
                         }
-                        Button(onClick = { CargarPost() }) {
+                        Button(onClick = { cargarPost() }) {
                             Text("Reintentar")
                         }
                     }
@@ -197,7 +197,7 @@ fun ScreenPost(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
 
-                            if (currentPost.commentCount != null || currentPost.link != null) {
+                            if ((currentPost.commentCount != null) || (currentPost.link != null)) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 HorizontalDivider()
                                 Spacer(modifier = Modifier.height(12.dp))

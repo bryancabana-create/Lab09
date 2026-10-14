@@ -38,14 +38,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun ScreenPosts(
     navController: NavHostController,
-    servicio: PostApiService
+    servicio: PostApiService,
 ) {
     var posts by remember { mutableStateOf<List<PostModel>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoading by remember { mutableStateOf(value = true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    fun CargarPosts() {
+    fun cargarPosts() {
         scope.launch {
             isLoading = true
             errorMessage = null
@@ -60,7 +60,7 @@ fun ScreenPosts(
     }
 
     LaunchedEffect(Unit) {
-        CargarPosts()
+        cargarPosts()
     }
 
     Box(
@@ -107,7 +107,7 @@ fun ScreenPosts(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { CargarPosts() }) {
+                    Button(onClick = { cargarPosts() }) {
                         Text("Reintentar")
                     }
                 }
