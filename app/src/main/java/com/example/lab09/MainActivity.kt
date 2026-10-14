@@ -12,7 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.lab09.ui.theme.Lab09Theme
-
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +30,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+fun crearServicio(): PostApiService {
+    val retrofit = Retrofit.Builder()
+        .baseUrl("https://json-placeholder.mock.beeceptor.com/")
+        .addConverterFactory(
+            GsonConverterFactory.create()
+        )
+        .build()
 
+    return retrofit.create(PostApiService::class.java)
+}
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
